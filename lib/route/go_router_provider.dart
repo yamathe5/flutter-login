@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,33 +23,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final notifier = ref.read(goRouterNotifierProvider);
 
   return GoRouter(
+    refreshListenable:
+        GoRouterRefreshListenable(FirebaseAuth.instance.authStateChanges()),
+
+    // GoRouterRefreshListenable(FirebaseAuth.instance.authStateChanges()),
+
     navigatorKey: _rootNavigator,
-    initialLocation: '/',
-    refreshListenable: notifier,
-    redirect: (context, state) {
-      final isLoggedIn = notifier.isLoggedIn;
-      final isGoingToLogin = state.subloc == '/login';
+    initialLocation: '/login',
+    // refreshListenable: notifier,
 
-      if (!isLoggedIn && !isGoingToLogin && !isDuplicate) {
-        isDuplicate = true;
-        return '/login';
-      }
-      if (isGoingToLogin && isGoingToLogin && !isDuplicate) {
-        isDuplicate = true;
-        return '/';
-      }
-
-      if (isDuplicate) {
-        isDuplicate = false;
-      }
-
-      return null;
-    },
     routes: [
       GoRoute(
         path: '/home',
         name: root,
-        builder: (context, state) => HomeScreen(key: state.pageKey),
+        builder: (context, state) => DashboardScreen(
+          key: state.pageKey,
+          child: HomeScreen(key: state.pageKey),
+        ),
       ),
       GoRoute(
         path: '/login',
@@ -107,5 +100,70 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       errorMsg: state.error.toString(),
       key: state.pageKey,
     ),
+    redirect: (context, state) {
+      // final userRepo = injector.get<UserRepository>();
+
+      final user = FirebaseAuth.instance;
+      const authPaths = [
+        '/login',
+      ];
+      bool isAuthPage = authPaths.contains(state.subloc);
+      print('=====in provider=====');
+      print(user.currentUser != null);
+      print(isAuthPage);
+      print(state.subloc);
+      print('=====out provider=====');
+
+      if (user.currentUser != null) {
+        if (isAuthPage) {
+          // FirebaseAuth.instance.signOut();
+          print('Home');
+          return '/home';
+        }
+      }
+      // return '/login';
+      if (user.currentUser == null) {
+        if (!isAuthPage) {
+          print('Login');
+          return '/login';
+        }
+      }
+      return null;
+
+      // final isLoggedIn = notifier.isLoggedIn;
+      // final isGoingToLogin = state.subloc == '/login';
+      // if (!isLoggedIn && !isGoingToLogin && !isDuplicate) {
+      //   isDuplicate = true;
+      //   return '/login';
+      // }
+      // if (isGoingToLogin && isGoingToLogin && !isDuplicate) {
+      //   isDuplicate = true;
+      //   return '/';
+      // }
+      // if (isDuplicate) {
+      //   isDuplicate = false;
+      // }
+
+      // return null;
+    },
   );
 });
+
+class GoRouterRefreshListenable extends ChangeNotifier {
+  GoRouterRefreshListenable(Stream stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+      (_) {
+        notifyListeners();
+      },
+    );
+  }
+
+  late final StreamSubscription _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}

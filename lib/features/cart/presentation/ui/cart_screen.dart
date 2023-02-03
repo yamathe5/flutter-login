@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class CartScreen extends StatefulWidget {
@@ -12,14 +11,12 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cart'),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Cart'),
+      // ),
       body: Center(
         child: Column(
-          children: const [
-            Text('Cart Screen')
-          ],
+          children: const [Text('Cart Screen')],
         ),
       ),
     );
