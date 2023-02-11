@@ -23,24 +23,24 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final notifier = ref.read(goRouterNotifierProvider);
 
   return GoRouter(
+    debugLogDiagnostics: true,
     refreshListenable:
         GoRouterRefreshListenable(FirebaseAuth.instance.authStateChanges()),
-
-    // GoRouterRefreshListenable(FirebaseAuth.instance.authStateChanges()),
 
     navigatorKey: _rootNavigator,
     initialLocation: '/login',
     // refreshListenable: notifier,
 
     routes: [
-      GoRoute(
-        path: '/home',
-        name: root,
-        builder: (context, state) => DashboardScreen(
-          key: state.pageKey,
-          child: HomeScreen(key: state.pageKey),
-        ),
-      ),
+      // IMPORTANTE - FUNCIONA A PESARDE ESTAR COMENTADA ESTA ZONA
+      // GoRoute(
+      //   path: '/home',
+      //   name: root,
+      //   builder: (context, state) => DashboardScreen(
+      //     key: state.pageKey,
+      //     child: HomeScreen(key: state.pageKey),
+      //   ),
+      // ),
       GoRoute(
         path: '/login',
         name: login,
@@ -108,17 +108,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         '/login',
       ];
       bool isAuthPage = authPaths.contains(state.subloc);
-      print('=====in provider=====');
-      print(user.currentUser != null);
-      print(isAuthPage);
-      print(state.subloc);
-      print('=====out provider=====');
+      // print('=====in provider=====');
+      // print(user.currentUser != null);
+      // print(isAuthPage);
+      // print(state.subloc);
+      // print('=====out provider=====');
 
       if (user.currentUser != null) {
         if (isAuthPage) {
           // FirebaseAuth.instance.signOut();
           print('Home');
-          return '/home';
+          return '/';
         }
       }
       // return '/login';
